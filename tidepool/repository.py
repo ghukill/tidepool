@@ -1,6 +1,7 @@
 """tidepool/repository.py"""
 # ruff: noqa: D105
 
+from typing import Generator, Iterator
 from importlib import import_module
 
 from tidepool import Item, settings
@@ -42,3 +43,13 @@ class TidepoolRepository:
             self.db.session.flush()
 
         return self.db.get_item(item.item_uuid)
+
+    def bulk_save_items(
+        self, items: Iterator[Item], yield_items=True, batch_size=1_000
+    ) -> Generator[Item]:
+        for i, item in enumerate(items):
+            saved_item = self.save_item(item, commit=False)
+            if i > 0 and i % batch_size == 0:
+                self.db.session.commit()
+            yield saved_item
+        self.db.session.commit()
