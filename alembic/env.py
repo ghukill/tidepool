@@ -1,14 +1,13 @@
 from logging.config import fileConfig
 
-from alembic import context
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 
+from alembic import context
 from tidepool import settings
-from tidepool.services.db import Base
 
 # NOTE: import models here to register for alembic CLI
-from tidepool.services.db import FileDB, ItemDB, RelationshipDB
+from tidepool.services.db import Base
+
 # NOTE: import models here to register for alembic CLI
 
 # this is the Alembic Config object, which provides

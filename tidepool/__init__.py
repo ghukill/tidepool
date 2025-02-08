@@ -6,8 +6,8 @@ from tidepool.relationship import Relationship
 from tidepool.repository import TidepoolRepository
 
 __all__ = [
-    "TidepoolRepository",
-    "Item",
     "File",
+    "Item",
     "Relationship",
+    "TidepoolRepository",
 ]

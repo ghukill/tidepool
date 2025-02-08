@@ -7,6 +7,7 @@ Clone repository:
 git clone https://github.com/ghukill/tidepool.git
 cd tidepool
 ```
+  * _NOTE_: if cloning as a functional repository, consider renaming on clone
 
 Create python environment:
 ```shell

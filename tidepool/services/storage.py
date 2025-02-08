@@ -1,18 +1,54 @@
 """tidepool/services/storage.py"""
 
 import io
-from typing import BinaryIO
+import logging
+import os
+import shutil
+from abc import abstractmethod
+from pathlib import Path
+from typing import TYPE_CHECKING, BinaryIO
 
 import boto3
-from botocore.client import BaseClient
 from botocore.exceptions import BotoCoreError, ClientError
 from botocore.response import StreamingBody
 
-from tidepool import settings
+from tidepool import File, settings
+
+if TYPE_CHECKING:
+    from botocore.client import BaseClient
+
+logger = logging.getLogger(__name__)
 
 
 class StorageService:
-    pass
+    @abstractmethod
+    def store_file(
+        self,
+        file: File,
+    ) -> Path: ...
+
+
+class POSIXStorageService(StorageService):
+    def __init__(self) -> None:
+        self.data_dir = os.path.expandvars(settings.POSIX_STORAGE["DATA_DIR"])
+        Path(self.data_dir).mkdir(parents=True, exist_ok=True)
+
+    def store_file(
+        self,
+        file: File,
+    ) -> Path:
+        dest_dir = Path(self.data_dir) / str(file.item_uuid)
+        dest_dir.mkdir(parents=True, exist_ok=True)
+
+        dest_path = dest_dir / f"{file.file_uuid}_{file.filename}"
+        if file.data:
+            with open(dest_path, "wb") as f:
+                f.write(file.data)
+        elif file.filepath:
+            shutil.copy(file.filepath, dest_path)
+        else:
+            raise ValueError("file data or filepath must be passed")
+        return dest_path
 
 
 class S3Client:
@@ -44,7 +80,7 @@ class S3Client:
         if isinstance(data, bytes):
             file_obj: BinaryIO = io.BytesIO(data)
         elif hasattr(data, "read"):
-            file_obj = data  # type: ignore
+            file_obj = data
         else:
             raise ValueError("Data must be a bytes object or a file-like object.")
 
@@ -55,11 +91,13 @@ class S3Client:
                 Key=key,
                 ExtraArgs={"ContentType": mimetype},
             )
-            print(f"Successfully uploaded object '{key}' to bucket '{self.bucket}'.")
+            logger.debug(
+                f"Successfully uploaded object '{key}' to bucket '{self.bucket}'."
+            )
             return f"s3://{self.bucket}/{key}"
 
         except (BotoCoreError, ClientError) as error:
-            print(f"Error uploading object: {error}")
+            logger.debug(f"Error uploading object: {error}")
             raise
 
     def read(self, key: str) -> bytes:
@@ -69,7 +107,7 @@ class S3Client:
             data: bytes = response["Body"].read()
             return data
         except (BotoCoreError, ClientError) as error:
-            print(f"Error reading object '{key}': {error}")
+            logger.debug(f"Error reading object '{key}': {error}")
             raise
 
     def read_stream(self, key: str) -> StreamingBody:
@@ -79,5 +117,5 @@ class S3Client:
             stream: StreamingBody = response["Body"]
             return stream
         except (BotoCoreError, ClientError) as error:
-            print(f"Error reading object '{key}' as stream: {error}")
+            logger.debug(f"Error reading object '{key}' as stream: {error}")
             raise

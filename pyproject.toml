@@ -19,6 +19,9 @@ dependencies = [
 target-version = "py313"
 line-length = 90
 show-fixes = true
+exclude = [
+    "alembic"
+]
 
 [tool.ruff.lint]
 select = ["ALL", "PT"]
