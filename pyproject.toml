@@ -7,9 +7,63 @@ requires-python = ">=3.13"
 dependencies = [
     "alembic>=1.14.1",
     "boto3>=1.36.11",
+    "click>=8.1.8",
     "ipython>=8.32.0",
     "psycopg2-binary>=2.9.10",
     "pytest>=8.3.4",
     "ruff>=0.9.4",
     "sqlalchemy>=2.0.37",
 ]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 90
+show-fixes = true
+
+[tool.ruff.lint]
+select = ["ALL", "PT"]
+ignore = [
+    "COM812",
+    "D107",
+    "EM101",
+    "N812",
+    "PTH",
+    "C90",
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D104",
+    "D415",
+    "D417",
+    "EM102",
+    "G004",
+    "PLR0912",
+    "PLR0913",
+    "PLR0915",
+    "S320",
+    "S321",
+    "S608",
+    "TRY003"
+]
+
+fixable = ["E", "F", "I", "Q"]
+
+[tool.ruff.lint.flake8-annotations]
+mypy-init-return = true
+
+[tool.ruff.lint.flake8-pytest-style]
+fixture-parentheses = false
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*" = [
+    "ANN",
+    "ARG001",
+    "S101",
+]
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 90
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"

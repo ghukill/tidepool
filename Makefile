@@ -3,6 +3,12 @@ export PYTHONPATH = .
 test:
 	pytest -vv
 
+lint:
+	uv run ruff check .
+
+lint-apply:
+	uv run ruff check --fix .
+
 services-start:
 	docker compose --env-file .env up
 

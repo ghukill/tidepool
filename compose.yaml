@@ -4,9 +4,9 @@ services:
     image: postgres:latest
     container_name: tidepool-postgres
     environment:
-      POSTGRES_USER: ${TIDEPOOL_PG_USER:-postgres}
-      POSTGRES_PASSWORD: ${TIDEPOOL_PG_PASSWORD:-password}
-      POSTGRES_DB: ${TIDEPOOL_PG_DB:-tidepool}
+      POSTGRES_USER: ${TIDEPOOL_DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${TIDEPOOL_DB_PASSWORD:-password}
+      POSTGRES_DB: ${TIDEPOOL_DB_NAME:-tidepool}
     ports:
       - "5432:5432"
     volumes:
@@ -15,37 +15,37 @@ services:
       - tidepool-network
     restart: unless-stopped
 
-  minio:
-    image: quay.io/minio/minio:latest
-    command: server --console-address ":9001" /mnt/data
-    ports:
-      - "9000:9000"  # API port
-      - "9001:9001"  # Console port
-    environment:
-      TIDEPOOL_MINIO_USERNAME: ${TIDEPOOL_MINIO_USERNAME:-minioadmin}
-      TIDEPOOL_MINIO_PASSWORD: ${TIDEPOOL_MINIO_PASSWORD:-minioadmin}
-    healthcheck:
-      test: [ "CMD", "mc", "ready", "local" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - tidepool-network
-    volumes:
-      - ${TIDEPOOL_MINIO_DATA_DIR:-$HOME/.tidepool/minio/data}:/mnt/data
-
-  quickwit:
-    image: quickwit/quickwit:latest
-    container_name: tidepool-quickwit
-    command: ["run"]
-    platform: "linux/amd64"
-    networks:
-      - tidepool-network
-    ports:
-      - "7280:7280"
-    volumes:
-      - ${TIDEPOOL_QW_DATA_DIR:-$HOME/.tidepool/quickwit/qwdata}:/quickwit/qwdata
-    restart: unless-stopped
+#  minio:
+#    image: quay.io/minio/minio:latest
+#    command: server --console-address ":9001" /mnt/data
+#    ports:
+#      - "9000:9000"  # API port
+#      - "9001:9001"  # Console port
+#    environment:
+#      TIDEPOOL_S3_USERNAME: ${TIDEPOOL_S3_USERNAME:-tidepool}
+#      TIDEPOOL_S3_PASSWORD: ${TIDEPOOL_S3_PASSWORD:-password}
+#    healthcheck:
+#      test: [ "CMD", "mc", "ready", "local" ]
+#      interval: 5s
+#      timeout: 5s
+#      retries: 5
+#    networks:
+#      - tidepool-network
+#    volumes:
+#      - ${TIDEPOOL_S3_DATA_DIR:-$HOME/.tidepool/minio/data}:/mnt/data
+#
+#  quickwit:
+#    image: quickwit/quickwit:latest
+#    container_name: tidepool-quickwit
+#    command: ["run"]
+#    platform: "linux/amd64"
+#    networks:
+#      - tidepool-network
+#    ports:
+#      - "7280:7280"
+#    volumes:
+#      - ${TIDEPOOL_QW_DATA_DIR:-$HOME/.tidepool/quickwit/qwdata}:/quickwit/qwdata
+#    restart: unless-stopped
 
 networks:
   tidepool-network:
