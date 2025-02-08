@@ -47,7 +47,9 @@ S3_STORAGE = {
     "DATA_DIR": os.environ.get("TIDEPOOL_S3_DATA_DIR", "$HOME/.tidepool/minio/data"),
 }
 PRIMARY_STORAGE_SERVICE = ("tidepool.services.storage", "POSIXStorageService")
-REPLICATION_STORAGE_SERVICES = []
+REPLICATION_STORAGE_SERVICES = [
+    ("tidepool.services.storage", "MinioStorageService"),
+]
 
 # -------------------------------------------------------------------
 # Full-Text Search

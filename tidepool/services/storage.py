@@ -1,5 +1,6 @@
 """tidepool/services/storage.py"""
 
+from importlib import import_module
 import io
 import logging
 import os
@@ -21,22 +22,35 @@ logger = logging.getLogger(__name__)
 
 
 class StorageService:
+    def __init__(self, *, replication: bool = False):
+        if not replication:
+            self.replication_services: list["StorageService"] = (
+                self.load_replication_storage_services()
+            )
+
+    def load_replication_storage_services(self):
+        return [
+            getattr(import_module(storage_module), storage_classname)(replication=True)
+            for storage_module, storage_classname in settings.REPLICATION_STORAGE_SERVICES
+        ]
+
     @abstractmethod
     def store_file(
         self,
         file: File,
-    ) -> Path: ...
+    ) -> str: ...
 
 
 class POSIXStorageService(StorageService):
-    def __init__(self) -> None:
+    def __init__(self, *, replication: bool = False) -> None:
+        super().__init__(replication=replication)
         self.data_dir = os.path.expandvars(settings.POSIX_STORAGE["DATA_DIR"])
         Path(self.data_dir).mkdir(parents=True, exist_ok=True)
 
     def store_file(
         self,
         file: File,
-    ) -> Path:
+    ) -> str:
         dest_dir = Path(self.data_dir) / str(file.item_uuid)
         dest_dir.mkdir(parents=True, exist_ok=True)
 
@@ -48,7 +62,30 @@ class POSIXStorageService(StorageService):
             shutil.copy(file.filepath, dest_path)
         else:
             raise ValueError("file data or filepath must be passed")
-        return dest_path
+        return str(dest_path)
+
+
+class MinioStorageService(StorageService):
+    def __init__(self, *, replication: bool = False):
+        super().__init__(replication=replication)
+
+    def store_file(
+        self,
+        file: File,
+    ) -> str:
+        s3client = S3Client()
+        s3_key = f"{file.item_uuid}/{file.file_uuid}_{file.filename}"
+
+        if file.data:
+            data = file.data
+        elif file.filepath:
+            # TODO: improve with streaming
+            with open(file.filepath, "rb") as f:
+                data = f.read()
+        else:
+            raise ValueError("file data or filepath must be passed")
+
+        return s3client.upload(s3_key, data)
 
 
 class S3Client:

@@ -22,8 +22,8 @@ services:
       - "9000:9000"  # API port
       - "9001:9001"  # Console port
     environment:
-      TIDEPOOL_S3_USERNAME: ${TIDEPOOL_S3_USERNAME:-tidepool}
-      TIDEPOOL_S3_PASSWORD: ${TIDEPOOL_S3_PASSWORD:-password}
+      MINIO_ROOT_USER: ${TIDEPOOL_S3_USERNAME:-tidepool}
+      MINIO_ROOT_PASSWORD: ${TIDEPOOL_S3_PASSWORD:-password}
     healthcheck:
       test: [ "CMD", "mc", "ready", "local" ]
       interval: 5s
@@ -33,7 +33,7 @@ services:
       - tidepool-network
     volumes:
       - ${TIDEPOOL_S3_DATA_DIR:-$HOME/.tidepool/minio/data}:/mnt/data
-        
+
 #  quickwit:
 #    image: quickwit/quickwit:latest
 #    container_name: tidepool-quickwit

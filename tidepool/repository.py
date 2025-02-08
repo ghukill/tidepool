@@ -26,11 +26,15 @@ class TidepoolRepository:
         # save item to DB
         item = self.db.save_item(item, commit=False)
 
-        # save files to DB and storage
+        # save files to DB
         for file in item.files:
             file.item_uuid = item.item_uuid
             saved_file = self.db.save_file(file, commit=False)
+
+            # save files to storage
             self.storage.store_file(saved_file)
+            for replication_service in self.storage.replication_services:
+                replication_service.store_file(saved_file)
 
         if commit:
             self.db.session.commit()
