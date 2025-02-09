@@ -38,7 +38,7 @@ class StorageService:
     def store_file(
         self,
         file: File,
-    ) -> str: ...
+    ) -> str | None: ...
 
 
 class POSIXStorageService(StorageService):
@@ -50,7 +50,7 @@ class POSIXStorageService(StorageService):
     def store_file(
         self,
         file: File,
-    ) -> str:
+    ) -> str | None:
         dest_dir = Path(self.data_dir) / str(file.item_uuid)
         dest_dir.mkdir(parents=True, exist_ok=True)
 
@@ -61,7 +61,7 @@ class POSIXStorageService(StorageService):
         elif file.filepath:
             shutil.copy(file.filepath, dest_path)
         else:
-            raise ValueError("file data or filepath must be passed")
+            return None
         return str(dest_path)
 
 
@@ -72,7 +72,7 @@ class MinioStorageService(StorageService):
     def store_file(
         self,
         file: File,
-    ) -> str:
+    ) -> str | None:
         s3client = S3Client()
         s3_key = f"{file.item_uuid}/{file.file_uuid}_{file.filename}"
 
@@ -83,7 +83,7 @@ class MinioStorageService(StorageService):
             with open(file.filepath, "rb") as f:
                 data = f.read()
         else:
-            raise ValueError("file data or filepath must be passed")
+            return None
 
         return s3client.upload(s3_key, data)
 

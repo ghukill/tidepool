@@ -4,12 +4,13 @@ import logging
 import uuid
 from typing import Optional
 
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy import UUID, Column, DateTime, ForeignKey, String, create_engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, declarative_base, relationship, sessionmaker
 from sqlalchemy.sql import func
 
-from tidepool import File, Item, settings
+from tidepool import File, Item, ItemMetadata, settings
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ class ItemDB(Base):
         default=uuid.uuid4,
     )
     title = Column(String, index=True)
-    description = Column(String)
+    jsonld_metadata = Column(JSONB, nullable=False, default={})
     date_created = Column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -46,7 +47,7 @@ class ItemDB(Base):
         return Item(
             item_uuid=self.item_uuid,
             title=self.title,
-            description=self.description,
+            jsonld_metadata=ItemMetadata.from_jsonld(self.jsonld_metadata),
             date_created=self.date_created,
             date_updated=self.date_updated,
         )
@@ -56,7 +57,7 @@ class ItemDB(Base):
         return cls(
             item_uuid=item.item_uuid,
             title=item.title,
-            description=item.description,
+            jsonld_metadata=item.jsonld_metadata.to_compact(),
         )
 
 
@@ -144,6 +145,11 @@ class DBService:
         Create if not exists, else update.
         """
         files = item.files
+
+        if not item.item_uuid:
+            item_uuid = str(uuid.uuid4())
+            item.item_uuid = item_uuid
+            item.jsonld_metadata.set_id(item_uuid)
 
         item_db = ItemDB.from_item(item)
 
