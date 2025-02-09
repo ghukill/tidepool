@@ -5,6 +5,7 @@ from typing import Generator, Iterator
 from importlib import import_module
 
 from tidepool import Item, settings
+from tidepool.exceptions import ItemNotFound
 from tidepool.services import DBService, StorageService
 
 
@@ -53,3 +54,39 @@ class TidepoolRepository:
                 self.db.session.commit()
             yield saved_item
         self.db.session.commit()
+
+    def get_item(self, item_uuid: str) -> Item:
+        item = self.db.get_item(item_uuid)
+        if not item:
+            raise ItemNotFound
+        return item
+
+    def delete_item(
+        self,
+        *,
+        item: Item | None = None,
+        item_uuid: str | None = None,
+        commit: bool = True,
+    ):
+        if not item and not item_uuid:
+            raise RuntimeError("An Item or Item UUID must be passed.")
+
+        if not item:
+            item = self.get_item(item_uuid)
+
+        for file in item.files:
+            # QUESTION: how should POSIXStorage handle the parent directory?
+            self.storage.delete_file(file)
+            for replication_service in self.storage.replication_services:
+                replication_service.delete_file(file)
+
+        for file in item.files:
+            self.db.delete_file(file, commit=False)
+        self.db.delete_item(item, commit=False)
+
+        if commit:
+            self.db.session.commit()
+        else:
+            self.db.session.flush()
+
+        return True

@@ -40,6 +40,12 @@ class StorageService:
         file: File,
     ) -> str | None: ...
 
+    @abstractmethod
+    def delete_file(
+        self,
+        file: File,
+    ) -> bool: ...
+
 
 class POSIXStorageService(StorageService):
     def __init__(self, *, replication: bool = False) -> None:
@@ -51,18 +57,37 @@ class POSIXStorageService(StorageService):
         self,
         file: File,
     ) -> str | None:
-        dest_dir = Path(self.data_dir) / str(file.item_uuid)
-        dest_dir.mkdir(parents=True, exist_ok=True)
+        file_dir = Path(self.data_dir) / str(file.item_uuid)
+        file_dir.mkdir(parents=True, exist_ok=True)
 
-        dest_path = dest_dir / f"{file.file_uuid}_{file.filename}"
+        file_path = file_dir / f"{file.file_uuid}_{file.filename}"
         if file.data:
-            with open(dest_path, "wb") as f:
+            with open(file_path, "wb") as f:
                 f.write(file.data)
         elif file.filepath:
-            shutil.copy(file.filepath, dest_path)
+            shutil.copy(file.filepath, file_path)
         else:
             return None
-        return str(dest_path)
+        return str(file_path)
+
+    def delete_file(
+        self,
+        file: File,
+    ) -> bool:
+        file_dir = Path(self.data_dir) / str(file.item_uuid)
+        file_path = file_dir / f"{file.file_uuid}_{file.filename}"
+        try:
+            os.remove(file_path)
+            logger.debug(f"removed item file: {file_path}")
+        except Exception as e:
+            logger.debug(f"Error deleting object '{file_path}': {e}")
+            return False
+
+        if not os.listdir(file_dir):
+            os.rmdir(file_dir)
+            logger.debug(f"removed item files directory: {file_dir}")
+
+        return True
 
 
 class MinioStorageService(StorageService):
@@ -86,6 +111,15 @@ class MinioStorageService(StorageService):
             return None
 
         return s3client.upload(s3_key, data)
+
+    def delete_file(
+        self,
+        file: File,
+    ) -> bool:
+        s3client = S3Client()
+        s3_key = f"{file.item_uuid}/{file.file_uuid}_{file.filename}"
+        s3client.delete(s3_key)
+        return True
 
 
 class S3Client:
@@ -144,7 +178,7 @@ class S3Client:
             data: bytes = response["Body"].read()
             return data
         except (BotoCoreError, ClientError) as error:
-            logger.debug(f"Error reading object '{key}': {error}")
+            logger.debug(f"error reading object '{key}': {error}")
             raise
 
     def read_stream(self, key: str) -> StreamingBody:
@@ -154,5 +188,14 @@ class S3Client:
             stream: StreamingBody = response["Body"]
             return stream
         except (BotoCoreError, ClientError) as error:
-            logger.debug(f"Error reading object '{key}' as stream: {error}")
+            logger.debug(f"error reading object '{key}' as stream: {error}")
+            raise
+
+    def delete(self, key: str) -> None:
+        """Delete an object from the S3 bucket."""
+        try:
+            self.s3.delete_object(Bucket=self.bucket, Key=key)
+            logger.debug(f"deleted S3 object '{key}' from bucket '{self.bucket}'.")
+        except (BotoCoreError, ClientError) as error:
+            logger.debug(f"error deleting object '{key}': {error}")
             raise

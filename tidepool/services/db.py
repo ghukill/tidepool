@@ -217,3 +217,23 @@ class DBService:
         file = file_db.to_file()
         file.item = item
         return file
+
+    def delete_item(self, item: "Item", *, commit: bool = True):
+        item_db = self._get_item_db(item.item_uuid)
+        self.session.delete(item_db)
+        if commit:
+            self.session.commit()
+        else:
+            self.session.flush()
+        return True
+
+    def delete_file(self, file: "File", *, commit: bool = True):
+        file_db = self._get_file_db(file.file_uuid)
+        if not file_db:
+            return False
+        self.session.delete(file_db)
+        if commit:
+            self.session.commit()
+        else:
+            self.session.flush()
+        return True

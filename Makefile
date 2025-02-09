@@ -1,7 +1,8 @@
 export PYTHONPATH = .
 
 test:
-	pytest -vv
+	uv run coverage run --source=tidepool -m pytest -vv
+	uv run coverage report -m
 
 lint:
 	uv run ruff check .

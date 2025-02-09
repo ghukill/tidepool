@@ -1,6 +1,23 @@
 """tidepool/settings.py"""
 
+import logging
 import os
+
+# -------------------------------------------------------------------
+# Logging
+# NOTE: currently, logging is quite basic for development purposes
+# -------------------------------------------------------------------
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler()],
+)
+logging.getLogger("asyncio").setLevel(logging.WARNING)
+logging.getLogger("boto3").setLevel(logging.WARNING)
+logging.getLogger("botocore").setLevel(logging.WARNING)
+logging.getLogger("s3transfer").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+
 
 # -------------------------------------------------------------------
 # Repository
