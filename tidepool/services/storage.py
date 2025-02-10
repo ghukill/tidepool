@@ -22,17 +22,36 @@ logger = logging.getLogger(__name__)
 
 
 class StorageService:
-    def __init__(self, *, replication: bool = False):
+    def __init__(
+        self,
+        config: dict,
+        *,
+        replication: bool = False,
+    ):
+        self.config = config
         if not replication:
             self.replication_services: list["StorageService"] = (
                 self.load_replication_storage_services()
             )
 
     def load_replication_storage_services(self):
-        return [
-            getattr(import_module(storage_module), storage_classname)(replication=True)
-            for storage_module, storage_classname in settings.REPLICATION_STORAGE_SERVICES
-        ]
+        replication_services = []
+        for storage_service_config in settings.REPLICATION_STORAGE_SERVICES:
+            storage_service = getattr(
+                import_module(storage_service_config["module"]),
+                storage_service_config["class"],
+            )
+            replication_services.append(
+                storage_service(
+                    config=storage_service_config["config"],
+                    replication=True,
+                )
+            )
+        return replication_services
+
+    @property
+    def name(self):
+        return self.config["NAME"]
 
     @abstractmethod
     def store_file(
@@ -48,9 +67,9 @@ class StorageService:
 
 
 class POSIXStorageService(StorageService):
-    def __init__(self, *, replication: bool = False) -> None:
-        super().__init__(replication=replication)
-        self.data_dir = os.path.expandvars(settings.POSIX_STORAGE["DATA_DIR"])
+    def __init__(self, config: dict, *, replication: bool = False) -> None:
+        super().__init__(config, replication=replication)
+        self.data_dir = os.path.expandvars(self.config["DATA_DIR"])
         Path(self.data_dir).mkdir(parents=True, exist_ok=True)
 
     def store_file(
@@ -80,7 +99,7 @@ class POSIXStorageService(StorageService):
             os.remove(file_path)
             logger.debug(f"removed item file: {file_path}")
         except Exception as e:
-            logger.debug(f"Error deleting object '{file_path}': {e}")
+            logger.debug(f"error deleting object '{file_path}': {e}")
             return False
 
         if not os.listdir(file_dir):
@@ -90,15 +109,24 @@ class POSIXStorageService(StorageService):
         return True
 
 
-class MinioStorageService(StorageService):
-    def __init__(self, *, replication: bool = False):
-        super().__init__(replication=replication)
+class S3StorageService(StorageService):
+    def __init__(self, config: dict, *, replication: bool = False) -> None:
+        super().__init__(config, replication=replication)
+
+    def get_s3_client(self):
+        return S3Client(
+            self.config["BUCKET"],
+            self.config["REGION"],
+            self.config["ACCESS_KEY_ID"],
+            self.config["SECRET_ACCESS_KEY"],
+            endpoint_url=self.config.get("ENDPOINT"),
+        )
 
     def store_file(
         self,
         file: File,
     ) -> str | None:
-        s3client = S3Client()
+        s3client = self.get_s3_client()
         s3_key = f"{file.item_uuid}/{file.file_uuid}_{file.filename}"
 
         if file.data:
@@ -116,7 +144,7 @@ class MinioStorageService(StorageService):
         self,
         file: File,
     ) -> bool:
-        s3client = S3Client()
+        s3client = self.get_s3_client()
         s3_key = f"{file.item_uuid}/{file.file_uuid}_{file.filename}"
         s3client.delete(s3_key)
         return True
@@ -125,11 +153,11 @@ class MinioStorageService(StorageService):
 class S3Client:
     def __init__(
         self,
-        bucket: str = settings.S3_STORAGE["BUCKET"],
-        region_name: str = settings.S3_STORAGE["REGION"],
-        endpoint_url: str = settings.S3_STORAGE["ENDPOINT"],
-        aws_access_key_id: str = settings.S3_STORAGE["ACCESS_KEY_ID"],
-        aws_secret_access_key: str = settings.S3_STORAGE["SECRET_ACCESS_KEY"],
+        bucket: str,
+        region_name: str,
+        aws_access_key_id: str,
+        aws_secret_access_key: str,
+        endpoint_url: str | None = None,
     ) -> None:
         """Initialize the S3 client."""
         self.bucket: str = bucket
