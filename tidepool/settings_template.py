@@ -64,48 +64,48 @@ PRIMARY_STORAGE_SERVICE = {
 }
 
 REPLICATION_STORAGE_SERVICES = [
-    {
-        "module": "tidepool.services.storage",
-        "class": "S3StorageService",
-        "config": {
-            "NAME": "local dockerized minio instance",
-            "REGION": os.environ.get("TIDEPOOL_MINIO_REGION", "us-east-1"),
-            "ENDPOINT": os.environ.get(
-                "TIDEPOOL_MINIO_ENDPOINT", "http://localhost:9000"
-            ),
-            "ACCESS_KEY_ID": os.environ.get("TIDEPOOL_MINIO_ACCESS_KEY_ID", "tidepool"),
-            "SECRET_ACCESS_KEY": os.environ.get(
-                "TIDEPOOL_MINIO_SECRET_ACCESS_KEY", "password"
-            ),
-            "BUCKET": os.environ.get("TIDEPOOL_MINIO_BUCKET", "tidepool"),
-            "DATA_DIR": os.environ.get(
-                "TIDEPOOL_MINIO_DATA_DIR", "$HOME/.tidepool/minio/data"
-            ),
-        },
-    },
-    {
-        "module": "tidepool.services.storage",
-        "class": "S3StorageService",
-        "config": {
-            "NAME": "personal AWS S3 bucket",
-            "REGION": os.environ.get("TIDEPOOL_S3_REGION", "us-east-1"),
-            "ACCESS_KEY_ID": os.environ.get("TIDEPOOL_S3_ACCESS_KEY_ID", "abc123..."),
-            "SECRET_ACCESS_KEY": os.environ.get(
-                "TIDEPOOL_S3_SECRET_ACCESS_KEY", "def456..."
-            ),
-            "BUCKET": os.environ.get("TIDEPOOL_S3_BUCKET", "tidepool"),
-        },
-    },
-    {
-        "module": "tidepool.services.storage",
-        "class": "POSIXStorageService",
-        "config": {
-            "NAME": "secondary filesystem on home network",
-            "DATA_DIR": os.environ.get(
-                "TIDEPOOL_POSIX_DATA_DIR-2", "/another/computer/somewhere"
-            ),
-        },
-    },
+    # {
+    #     "module": "tidepool.services.storage",
+    #     "class": "S3StorageService",
+    #     "config": {
+    #         "NAME": "local dockerized minio instance",
+    #         "REGION": os.environ.get("TIDEPOOL_MINIO_REGION", "us-east-1"),
+    #         "ENDPOINT": os.environ.get(
+    #             "TIDEPOOL_MINIO_ENDPOINT", "http://localhost:9000"
+    #         ),
+    #         "ACCESS_KEY_ID": os.environ.get("TIDEPOOL_MINIO_ACCESS_KEY_ID", "tidepool"),
+    #         "SECRET_ACCESS_KEY": os.environ.get(
+    #             "TIDEPOOL_MINIO_SECRET_ACCESS_KEY", "password"
+    #         ),
+    #         "BUCKET": os.environ.get("TIDEPOOL_MINIO_BUCKET", "tidepool"),
+    #         "DATA_DIR": os.environ.get(
+    #             "TIDEPOOL_MINIO_DATA_DIR", "$HOME/.tidepool/minio/data"
+    #         ),
+    #     },
+    # },
+    # {
+    #     "module": "tidepool.services.storage",
+    #     "class": "S3StorageService",
+    #     "config": {
+    #         "NAME": "personal AWS S3 bucket",
+    #         "REGION": os.environ.get("TIDEPOOL_S3_REGION", "us-east-1"),
+    #         "ACCESS_KEY_ID": os.environ.get("TIDEPOOL_S3_ACCESS_KEY_ID", "abc123..."),
+    #         "SECRET_ACCESS_KEY": os.environ.get(
+    #             "TIDEPOOL_S3_SECRET_ACCESS_KEY", "def456..."
+    #         ),
+    #         "BUCKET": os.environ.get("TIDEPOOL_S3_BUCKET", "tidepool"),
+    #     },
+    # },
+    # {
+    #     "module": "tidepool.services.storage",
+    #     "class": "POSIXStorageService",
+    #     "config": {
+    #         "NAME": "secondary filesystem on home network",
+    #         "DATA_DIR": os.environ.get(
+    #             "TIDEPOOL_POSIX_DATA_DIR-2", "/another/computer/somewhere"
+    #         ),
+    #     },
+    # },
 ]
 
 

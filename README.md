@@ -19,6 +19,11 @@ Install dependencies:
 uv sync
 ```
 
+Create `settings.py` file from template
+```shell
+cp tidepool/settings_template.py tidepool/settings.py
+```
+
 Start docker containers:
 ```shell
 docker compose up -d
