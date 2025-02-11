@@ -7,7 +7,7 @@ from importlib import import_module
 
 from tidepool import Item, settings
 from tidepool.exceptions import ItemNotFound
-from tidepool.services import DBService, StorageService
+from tidepool.services import PostgresDBService, StorageService
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ class TidepoolRepository:
     def __init__(self) -> None:
         self.name = settings.REPOSITORY_NAME
         self.settings = settings
-        self.db = DBService()
+        self.db = PostgresDBService()
         self.storage = self.load_primary_storage_service()
 
     def __repr__(self) -> str:
@@ -69,6 +69,9 @@ class TidepoolRepository:
         if not item:
             raise ItemNotFound
         return item
+
+    def get_items(self):
+        yield from self.db.get_items()
 
     def delete_item(
         self,

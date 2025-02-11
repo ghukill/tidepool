@@ -2,7 +2,7 @@
 
 import logging
 import uuid
-from typing import Optional
+from typing import Iterator, Optional
 
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy import UUID, Column, DateTime, ForeignKey, String, create_engine
@@ -21,6 +21,10 @@ def create_db_session() -> Session:
     engine = create_engine(settings.DATABASE_CONNECTION_URI)
     local_session = sessionmaker(bind=engine)
     return local_session()
+
+
+class DBService:
+    pass
 
 
 class ItemDB(Base):
@@ -129,7 +133,7 @@ class RelationshipDB(Base):
     date_updated = Column(DateTime(timezone=True), onupdate=func.now())
 
 
-class DBService:
+class PostgresDBService(DBService):
     def __init__(self, session: Session | None = None):
         self.session = session or create_db_session()
 
@@ -217,6 +221,15 @@ class DBService:
         file = file_db.to_file()
         file.item = item
         return file
+
+    def get_items(self, batch_size=100) -> Iterator["Item"]:
+        """Yield all Items from the item table."""
+        query = self.session.query(ItemDB).yield_per(batch_size)
+        for item_db in query:
+            files = [file.to_file() for file in item_db.files]
+            item = item_db.to_item()
+            item.files = files
+            yield item
 
     def delete_item(self, item: "Item", *, commit: bool = True):
         item_db = self._get_item_db(item.item_uuid)
