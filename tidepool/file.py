@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
+from tidepool import settings
+
 if TYPE_CHECKING:
     from tidepool import Item
 
@@ -32,9 +34,17 @@ class File:
         self.date_updated = date_updated
         self.item = item
 
+    @property
+    def api_uri(self):
+        return (
+            f"{settings.API_BASE_URI}/api/items/{self.item_uuid}/files/{self.file_uuid}"
+        )
+
     def to_dict(self):
         return {
             "file_uuid": str(self.file_uuid),
+            "api_uri": self.api_uri,
+            "data_uri": f"{self.api_uri}/data",
             "filename": str(self.filename),
             "mimetype": str(self.mimetype),
             "date_created": self.date_created.isoformat() if self.date_created else None,

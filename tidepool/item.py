@@ -6,6 +6,7 @@ from typing import Optional, TYPE_CHECKING
 
 from pyld import jsonld
 
+from tidepool import settings
 from tidepool.exceptions import FileNotFound
 
 if TYPE_CHECKING:
@@ -29,6 +30,10 @@ class Item:
         self.date_created = date_created
         self.date_updated = date_updated
 
+    @property
+    def api_uri(self):
+        return f"{settings.API_BASE_URI}/api/items/{self.item_uuid}"
+
     def get_file(self, file_uuid: str):
         for file in self.files:
             if str(file.file_uuid) == str(file_uuid):
@@ -38,6 +43,7 @@ class Item:
     def to_dict(self):
         return {
             "item_uuid": str(self.item_uuid),
+            "api_uri": self.api_uri,
             "title": self.title,
             "jsonld_metadata": self.jsonld_metadata.to_compact(),
             "files": [file.to_dict() for file in self.files],
