@@ -5,7 +5,7 @@ import logging
 from typing import Generator, Iterator
 from importlib import import_module
 
-from tidepool import Item, settings
+from tidepool import File, Item, settings
 from tidepool.exceptions import ItemNotFound
 from tidepool.services import PostgresDBService, StorageService
 
@@ -101,3 +101,6 @@ class TidepoolRepository:
             self.db.session.flush()
 
         return True
+
+    def read_file_data(self, file: File) -> bytes:
+        return self.storage.read_file(file)

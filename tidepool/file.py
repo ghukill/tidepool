@@ -1,6 +1,7 @@
 """tidepool/file.py"""
 
 import datetime
+import json
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
@@ -30,3 +31,15 @@ class File:
         self.date_created = date_created
         self.date_updated = date_updated
         self.item = item
+
+    def to_dict(self):
+        return {
+            "file_uuid": str(self.file_uuid),
+            "filename": str(self.filename),
+            "mimetype": str(self.mimetype),
+            "date_created": self.date_created.isoformat() if self.date_created else None,
+            "date_updated": self.date_updated.isoformat() if self.date_updated else None,
+        }
+
+    def to_json(self, indent=None):
+        return json.dumps(self.to_dict(), indent=indent)

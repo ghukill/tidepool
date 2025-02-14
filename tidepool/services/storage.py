@@ -65,6 +65,12 @@ class StorageService:
         file: File,
     ) -> bool: ...
 
+    @abstractmethod
+    def read_file(
+        self,
+        file: File,
+    ) -> bytes: ...
+
 
 class POSIXStorageService(StorageService):
     def __init__(self, config: dict, *, replication: bool = False) -> None:
@@ -72,14 +78,18 @@ class POSIXStorageService(StorageService):
         self.data_dir = os.path.expandvars(self.config["DATA_DIR"])
         Path(self.data_dir).mkdir(parents=True, exist_ok=True)
 
+    def get_file_dir_and_path(self, file: File):
+        file_dir = Path(self.data_dir) / str(file.item_uuid)
+        file_path = file_dir / f"{file.file_uuid}__{file.filename}"
+        return file_dir, file_path
+
     def store_file(
         self,
         file: File,
     ) -> str | None:
-        file_dir = Path(self.data_dir) / str(file.item_uuid)
+        file_dir, file_path = self.get_file_dir_and_path(file)
         file_dir.mkdir(parents=True, exist_ok=True)
 
-        file_path = file_dir / f"{file.file_uuid}_{file.filename}"
         if file.data:
             with open(file_path, "wb") as f:
                 f.write(file.data)
@@ -93,8 +103,7 @@ class POSIXStorageService(StorageService):
         self,
         file: File,
     ) -> bool:
-        file_dir = Path(self.data_dir) / str(file.item_uuid)
-        file_path = file_dir / f"{file.file_uuid}_{file.filename}"
+        file_dir, file_path = self.get_file_dir_and_path(file)
         try:
             os.remove(file_path)
             logger.debug(f"removed item file: {file_path}")
@@ -107,6 +116,12 @@ class POSIXStorageService(StorageService):
             logger.debug(f"removed item files directory: {file_dir}")
 
         return True
+
+    # TODO: add a streaming version
+    def read_file(self, file: File):
+        file_dir, file_path = self.get_file_dir_and_path(file)
+        with open(file_path, "rb") as f:
+            return f.read()
 
 
 class S3StorageService(StorageService):
@@ -122,12 +137,15 @@ class S3StorageService(StorageService):
             endpoint_url=self.config.get("ENDPOINT"),
         )
 
+    def get_s3_key(self, file: File):
+        return f"{file.item_uuid}/{file.file_uuid}__{file.filename}"
+
     def store_file(
         self,
         file: File,
     ) -> str | None:
         s3client = self.get_s3_client()
-        s3_key = f"{file.item_uuid}/{file.file_uuid}_{file.filename}"
+        s3_key = self.get_s3_key(file)
 
         if file.data:
             data = file.data
@@ -145,9 +163,15 @@ class S3StorageService(StorageService):
         file: File,
     ) -> bool:
         s3client = self.get_s3_client()
-        s3_key = f"{file.item_uuid}/{file.file_uuid}_{file.filename}"
+        s3_key = self.get_s3_key(file)
         s3client.delete(s3_key)
         return True
+
+    def read_file(
+        self,
+        file: File,
+    ) -> bytes:
+        raise NotImplementedError()
 
 
 class S3Client:

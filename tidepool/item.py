@@ -6,6 +6,8 @@ from typing import Optional, TYPE_CHECKING
 
 from pyld import jsonld
 
+from tidepool.exceptions import FileNotFound
+
 if TYPE_CHECKING:
     from tidepool import File
 
@@ -26,6 +28,25 @@ class Item:
         self.files = files or []
         self.date_created = date_created
         self.date_updated = date_updated
+
+    def get_file(self, file_uuid: str):
+        for file in self.files:
+            if str(file.file_uuid) == str(file_uuid):
+                return file
+        raise FileNotFound
+
+    def to_dict(self):
+        return {
+            "item_uuid": str(self.item_uuid),
+            "title": self.title,
+            "jsonld_metadata": self.jsonld_metadata.to_compact(),
+            "files": [file.to_dict() for file in self.files],
+            "date_created": self.date_created.isoformat() if self.date_created else None,
+            "date_updated": self.date_updated.isoformat() if self.date_updated else None,
+        }
+
+    def to_json(self, indent=None):
+        return json.dumps(self.to_dict(), indent=indent)
 
 
 class ItemMetadata:
