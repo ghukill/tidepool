@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
-from tidepool import settings
+from tidepool.settings.manager import settings
 
 if TYPE_CHECKING:
     from tidepool import Item

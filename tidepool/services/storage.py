@@ -1,11 +1,11 @@
 """tidepool/services/storage.py"""
 
-from importlib import import_module
 import io
 import logging
 import os
 import shutil
 from abc import abstractmethod
+from importlib import import_module
 from pathlib import Path
 from typing import TYPE_CHECKING, BinaryIO
 
@@ -13,7 +13,8 @@ import boto3
 from botocore.exceptions import BotoCoreError, ClientError
 from botocore.response import StreamingBody
 
-from tidepool import File, settings
+from tidepool import File
+from tidepool.settings.manager import settings
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient

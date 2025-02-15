@@ -4,6 +4,7 @@ from tidepool.file import File
 from tidepool.item import Item, ItemMetadata
 from tidepool.relationship import Relationship
 from tidepool.repository import TidepoolRepository
+from tidepool.settings.manager import settings
 
 __all__ = [
     "File",
@@ -11,4 +12,5 @@ __all__ = [
     "ItemMetadata",
     "Relationship",
     "TidepoolRepository",
+    "settings",
 ]

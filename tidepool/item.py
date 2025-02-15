@@ -2,12 +2,12 @@
 
 import datetime
 import json
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from pyld import jsonld
 
-from tidepool import settings
 from tidepool.exceptions import FileNotFound
+from tidepool.settings.manager import settings
 
 if TYPE_CHECKING:
     from tidepool import File

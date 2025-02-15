@@ -3,7 +3,7 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
-from tidepool import settings
+from tidepool.settings.manager import settings
 
 # NOTE: import models here to register for alembic CLI
 from tidepool.services.db import Base

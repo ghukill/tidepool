@@ -2,12 +2,13 @@
 # ruff: noqa: D105
 
 import logging
-from typing import Generator, Iterator
 from importlib import import_module
+from typing import Generator, Iterator
 
-from tidepool import File, Item, settings
+from tidepool import File, Item
 from tidepool.exceptions import ItemNotFound
 from tidepool.services import PostgresDBService, StorageService
+from tidepool.settings.manager import settings
 
 logger = logging.getLogger(__name__)
 

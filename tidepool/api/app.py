@@ -1,10 +1,10 @@
 """tidepool/api/app.py"""
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify
 from flask_cors import CORS
 
-from tidepool import settings
 from tidepool import TidepoolRepository
+from tidepool.settings.manager import settings
 
 app = Flask(__name__)
 CORS(app)

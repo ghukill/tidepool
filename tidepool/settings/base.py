@@ -22,7 +22,10 @@ logging.getLogger("urllib3").setLevel(logging.WARNING)
 # -------------------------------------------------------------------
 # Repository
 # -------------------------------------------------------------------
-REPOSITORY_NAME = os.environ.get("TIDEPOOL_REPOSITORY_NAME", "Tidepool Repository")
+REPOSITORY_NAME = os.environ.get(
+    "TIDEPOOL_REPOSITORY_NAME",
+    "A Tidepool Repository",
+)
 
 
 # -------------------------------------------------------------------
@@ -64,25 +67,25 @@ PRIMARY_STORAGE_SERVICE = {
 }
 
 REPLICATION_STORAGE_SERVICES = [
-    # {
-    #     "module": "tidepool.services.storage",
-    #     "class": "S3StorageService",
-    #     "config": {
-    #         "NAME": "local dockerized minio instance",
-    #         "REGION": os.environ.get("TIDEPOOL_MINIO_REGION", "us-east-1"),
-    #         "ENDPOINT": os.environ.get(
-    #             "TIDEPOOL_MINIO_ENDPOINT", "http://localhost:9000"
-    #         ),
-    #         "ACCESS_KEY_ID": os.environ.get("TIDEPOOL_MINIO_ACCESS_KEY_ID", "tidepool"),
-    #         "SECRET_ACCESS_KEY": os.environ.get(
-    #             "TIDEPOOL_MINIO_SECRET_ACCESS_KEY", "password"
-    #         ),
-    #         "BUCKET": os.environ.get("TIDEPOOL_MINIO_BUCKET", "tidepool"),
-    #         "DATA_DIR": os.environ.get(
-    #             "TIDEPOOL_MINIO_DATA_DIR", "$HOME/.tidepool/minio/data"
-    #         ),
-    #     },
-    # },
+    {
+        "module": "tidepool.services.storage",
+        "class": "S3StorageService",
+        "config": {
+            "NAME": "local dockerized minio instance",
+            "REGION": os.environ.get("TIDEPOOL_MINIO_REGION", "us-east-1"),
+            "ENDPOINT": os.environ.get(
+                "TIDEPOOL_MINIO_ENDPOINT", "http://localhost:9000"
+            ),
+            "ACCESS_KEY_ID": os.environ.get("TIDEPOOL_MINIO_ACCESS_KEY_ID", "tidepool"),
+            "SECRET_ACCESS_KEY": os.environ.get(
+                "TIDEPOOL_MINIO_SECRET_ACCESS_KEY", "password"
+            ),
+            "BUCKET": os.environ.get("TIDEPOOL_MINIO_BUCKET", "tidepool"),
+            "DATA_DIR": os.environ.get(
+                "TIDEPOOL_MINIO_DATA_DIR", "$HOME/.tidepool/minio/data"
+            ),
+        },
+    },
     # {
     #     "module": "tidepool.services.storage",
     #     "class": "S3StorageService",
@@ -113,3 +116,12 @@ REPLICATION_STORAGE_SERVICES = [
 # Full-Text Search
 # -------------------------------------------------------------------
 # TODO...
+
+
+# -------------------------------------------------------------------
+# API
+# -------------------------------------------------------------------
+API_HOST = "localhost"
+API_PORT = 5000
+API_DEBUG = True
+API_BASE_URI = f"http://{API_HOST}:{API_PORT}"

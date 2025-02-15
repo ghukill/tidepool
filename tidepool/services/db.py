@@ -4,13 +4,14 @@ import logging
 import uuid
 from typing import Iterator, Optional
 
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy import UUID, Column, DateTime, ForeignKey, String, create_engine
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, declarative_base, relationship, sessionmaker
 from sqlalchemy.sql import func
 
-from tidepool import File, Item, ItemMetadata, settings
+from tidepool import File, Item, ItemMetadata
+from tidepool.settings.manager import settings
 
 logger = logging.getLogger(__name__)
 
