@@ -21,6 +21,9 @@ class TidepoolSettings:
         except KeyError:
             raise AttributeError(f"Setting '{name}' not found")
 
+    def clear(self):
+        self._settings = {}
+
     def load_from_module(self) -> dict:
         settings_module = os.environ.get(
             "TIDEPOOL_SETTINGS_MODULE",

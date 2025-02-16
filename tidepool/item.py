@@ -60,17 +60,35 @@ class Item:
         title: str | None = None,
         metadata: dict | None = None,
     ):
-        filename = filepath.split("/")[-1]
-        mimetype, _ = mimetypes.guess_type(filepath)
+        file = File.from_filepath(filepath)
         item = cls(
-            title=title or filename,
-            files=[
-                File(
-                    filename=filename,
-                    mimetype=mimetype,
-                    filepath=filepath,
-                )
-            ],
+            title=title or file.filename,
+            files=[file],
+        )
+        item.jsonld_metadata.set_statement("dc:title", item.title)
+        if metadata:
+            for key, val in metadata.items():
+                item.jsonld_metadata.set_statement(key, val)
+        return item
+
+    @classmethod
+    def from_data(
+        cls,
+        data: bytes,
+        filename: str,
+        title: str | None = None,
+        metadata: dict | None = None,
+    ):
+        if not title:
+            title = "Unknown"
+
+        file = File.from_filepath(filename)
+        file.filepath = None
+        file.data = data
+
+        item = cls(
+            title=title,
+            files=[file],
         )
         item.jsonld_metadata.set_statement("dc:title", item.title)
         if metadata:

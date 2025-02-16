@@ -2,6 +2,7 @@
 
 import datetime
 import json
+import mimetypes
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
@@ -52,3 +53,16 @@ class File:
 
     def to_json(self, indent=None):
         return json.dumps(self.to_dict(), indent=indent)
+
+    @classmethod
+    def from_filepath(
+        cls,
+        filepath: str,
+    ):
+        filename = filepath.split("/")[-1]
+        mimetype, _ = mimetypes.guess_type(filepath)
+        return File(
+            filename=filename,
+            mimetype=mimetype,
+            filepath=filepath,
+        )
