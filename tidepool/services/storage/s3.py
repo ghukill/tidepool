@@ -1,12 +1,7 @@
-"""tidepool/services/storage.py"""
+"""tidepool/services/storage/s3.py"""
 
 import io
 import logging
-import os
-import shutil
-from abc import abstractmethod
-from importlib import import_module
-from pathlib import Path
 from typing import TYPE_CHECKING, BinaryIO
 
 import boto3
@@ -14,115 +9,12 @@ from botocore.exceptions import BotoCoreError, ClientError
 from botocore.response import StreamingBody
 
 from tidepool import File
-from tidepool.settings.manager import settings
+from tidepool.services.storage.base import StorageService
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient
 
 logger = logging.getLogger(__name__)
-
-
-class StorageService:
-    def __init__(
-        self,
-        config: dict,
-        *,
-        replication: bool = False,
-    ):
-        self.config = config
-        if not replication:
-            self.replication_services: list["StorageService"] = (
-                self.load_replication_storage_services()
-            )
-
-    def load_replication_storage_services(self):
-        replication_services = []
-        for storage_service_config in settings.REPLICATION_STORAGE_SERVICES:
-            storage_service = getattr(
-                import_module(storage_service_config["module"]),
-                storage_service_config["class"],
-            )
-            replication_services.append(
-                storage_service(
-                    config=storage_service_config["config"],
-                    replication=True,
-                )
-            )
-        return replication_services
-
-    @property
-    def name(self):
-        return self.config["NAME"]
-
-    @abstractmethod
-    def store_file(
-        self,
-        file: File,
-    ) -> str | None: ...
-
-    @abstractmethod
-    def delete_file(
-        self,
-        file: File,
-    ) -> bool: ...
-
-    @abstractmethod
-    def read_file(
-        self,
-        file: File,
-    ) -> bytes: ...
-
-
-class POSIXStorageService(StorageService):
-    def __init__(self, config: dict, *, replication: bool = False) -> None:
-        super().__init__(config, replication=replication)
-        self.data_dir = os.path.expandvars(self.config["DATA_DIR"])
-        Path(self.data_dir).mkdir(parents=True, exist_ok=True)
-
-    def get_file_dir_and_path(self, file: File):
-        file_dir = Path(self.data_dir) / str(file.item_uuid)
-        file_path = file_dir / f"{file.file_uuid}__{file.filename}"
-        return file_dir, file_path
-
-    def store_file(
-        self,
-        file: File,
-    ) -> str | None:
-        file_dir, file_path = self.get_file_dir_and_path(file)
-        file_dir.mkdir(parents=True, exist_ok=True)
-
-        if file.data:
-            with open(file_path, "wb") as f:
-                f.write(file.data)
-        elif file.filepath:
-            shutil.copy(file.filepath, file_path)
-        else:
-            return None
-        return str(file_path)
-
-    def delete_file(
-        self,
-        file: File,
-    ) -> bool:
-        file_dir, file_path = self.get_file_dir_and_path(file)
-        try:
-            os.remove(file_path)
-            logger.debug(f"removed item file: {file_path}")
-        except Exception as e:
-            logger.debug(f"error deleting object '{file_path}': {e}")
-            return False
-
-        if not os.listdir(file_dir):
-            os.rmdir(file_dir)
-            logger.debug(f"removed item files directory: {file_dir}")
-
-        return True
-
-    # TODO: add a streaming version
-    def read_file(self, file: File):
-        file_dir, file_path = self.get_file_dir_and_path(file)
-        with open(file_path, "rb") as f:
-            return f.read()
 
 
 class S3StorageService(StorageService):

@@ -7,7 +7,8 @@ from typing import Generator, Iterator
 
 from tidepool import File, Item
 from tidepool.exceptions import ItemNotFound
-from tidepool.services import PostgresDBService, StorageService
+from tidepool.services.db import PostgresDBService
+from tidepool.services.storage import StorageService
 from tidepool.settings.manager import settings
 
 logger = logging.getLogger(__name__)

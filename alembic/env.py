@@ -6,7 +6,7 @@ from alembic import context
 from tidepool.settings.manager import settings
 
 # NOTE: import models here to register for alembic CLI
-from tidepool.services.db import Base
+from tidepool.services.db.base import Base
 
 # NOTE: import models here to register for alembic CLI
 
