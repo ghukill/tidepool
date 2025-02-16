@@ -1,3 +1,7 @@
+ifneq (,$(wildcard ./.env))
+    include .env
+    export
+endif
 export PYTHONPATH = .
 
 test:
@@ -21,3 +25,9 @@ services-stop:
 
 services-tail-logs:
 	docker compose --env-file .env logs -f
+
+start-api:
+	uv run flask -A tidepool.api.app:api_app --debug run --host 0.0.0.0 -p 5000
+
+start-ui:
+	uv run flask -A tidepool.ui.app:ui_app --debug run --host 0.0.0.0 -p 5001

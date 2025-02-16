@@ -1,23 +1,37 @@
 """tidepool/api/app.py"""
 
-from flask import Flask, jsonify
+import logging
+import time
+
+from flask import Flask, jsonify, g
 from flask_cors import CORS
 
 from tidepool import TidepoolRepository
 from tidepool.settings.manager import settings
 
-app = Flask(__name__)
-CORS(app)
+logger = logging.getLogger(__name__)
 
-# TODO: create a standard response object class
+api_app = Flask(__name__)
+CORS(api_app)
 
 
-@app.route("/api", methods=["GET"])
+@api_app.before_request
+def before_request():
+    g.start_time = time.time()
+
+
+@api_app.after_request
+def after_request(response):
+    logger.debug(f"API elapsed: {time.time() - g.start_time}")
+    return response
+
+
+@api_app.route("/api", methods=["GET"])
 def root():
     return jsonify({"repository_name": settings.REPOSITORY_NAME})
 
 
-@app.route("/api/items", methods=["GET"])
+@api_app.route("/api/items", methods=["GET"])
 def items():
     # TODO: this needs pagination, simple filtering, and sorting
     #   - this could drive a very simple datatables interface
@@ -26,7 +40,7 @@ def items():
     return jsonify(items)
 
 
-@app.route("/api/items/<item_uuid>", methods=["GET"])
+@api_app.route("/api/items/<item_uuid>", methods=["GET"])
 def items_item(item_uuid: str):
     # TODO: standardize this; maybe embed as @before_request
     tr = TidepoolRepository()
@@ -34,14 +48,14 @@ def items_item(item_uuid: str):
     return jsonify(item.to_dict())
 
 
-@app.route("/api/items/<item_uuid>/files", methods=["GET"])
+@api_app.route("/api/items/<item_uuid>/files", methods=["GET"])
 def items_item_files(item_uuid: str):
     tr = TidepoolRepository()
     item = tr.get_item(item_uuid=item_uuid)
     return jsonify([file.to_dict() for file in item.files])
 
 
-@app.route("/api/items/<item_uuid>/files/<file_uuid>", methods=["GET"])
+@api_app.route("/api/items/<item_uuid>/files/<file_uuid>", methods=["GET"])
 def items_item_files_file(item_uuid: str, file_uuid: str):
     tr = TidepoolRepository()
     item = tr.get_item(item_uuid=item_uuid)
@@ -50,13 +64,13 @@ def items_item_files_file(item_uuid: str, file_uuid: str):
 
 
 # TODO: support streaming
-@app.route("/api/items/<item_uuid>/files/<file_uuid>/data", methods=["GET"])
+@api_app.route("/api/items/<item_uuid>/files/<file_uuid>/data", methods=["GET"])
 def item_file_data(item_uuid: str, file_uuid: str):
     tr = TidepoolRepository()
     item = tr.get_item(item_uuid=item_uuid)
     file = item.get_file(file_uuid)
     file_data = tr.read_file_data(file)
-    response = app.response_class(
+    response = api_app.response_class(
         response=file_data,
         status=200,
         mimetype=file.mimetype,
@@ -66,7 +80,7 @@ def item_file_data(item_uuid: str, file_uuid: str):
 
 
 if __name__ == "__main__":
-    app.run(
+    api_app.run(
         host=settings.API_HOST,
         port=settings.API_PORT,
         debug=settings.API_DEBUG,

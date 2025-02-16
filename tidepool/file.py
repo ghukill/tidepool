@@ -36,9 +36,7 @@ class File:
 
     @property
     def api_uri(self):
-        return (
-            f"{settings.API_BASE_URI}/api/items/{self.item_uuid}/files/{self.file_uuid}"
-        )
+        return f"{settings.API_BASE_URI}/items/{self.item_uuid}/files/{self.file_uuid}"
 
     def to_dict(self):
         return {

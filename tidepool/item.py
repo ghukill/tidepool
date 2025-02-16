@@ -32,7 +32,7 @@ class Item:
 
     @property
     def api_uri(self):
-        return f"{settings.API_BASE_URI}/api/items/{self.item_uuid}"
+        return f"{settings.API_BASE_URI}/items/{self.item_uuid}"
 
     def get_file(self, file_uuid: str):
         for file in self.files:

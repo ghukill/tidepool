@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Items{% endblock %}
+
+{% block content %}
+<section>
+
+    <table id="itemsTable">
+        <thead>
+            <tr>
+                <th>Item UUID</th>
+                <th>Title</th>
+                <th>Created</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in api %}
+                <tr>
+                    <td><code>{{item.item_uuid}}</code></td>
+                    <td>{{item.title}}</td>
+                    <td>{{item.date_created}}</td>
+                    <td><a href="/ui/items/{{item.item_uuid}}">View</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</section>
+
+<script>
+    let itemsTable = new DataTable('#itemsTable');
+</script>
+{% endblock %}

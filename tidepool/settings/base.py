@@ -124,4 +124,13 @@ REPLICATION_STORAGE_SERVICES = [
 API_HOST = "localhost"
 API_PORT = 5000
 API_DEBUG = True
-API_BASE_URI = f"http://{API_HOST}:{API_PORT}"
+API_BASE_URI = f"http://{API_HOST}:{API_PORT}/api"
+
+
+# -------------------------------------------------------------------
+# UI
+# -------------------------------------------------------------------
+UI_HOST = "localhost"
+UI_PORT = 5001
+UI_DEBUG = True
+UI_BASE_URI = f"http://{API_HOST}:{API_PORT}/ui"

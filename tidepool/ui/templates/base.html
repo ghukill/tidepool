@@ -1,0 +1,35 @@
+<html data-theme="dark">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Default Title{% endblock %}</title>
+
+        <!-- CSS framework -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/pico.min.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/tidepool.css') }}">
+
+        <!-- jQuery + Datatables -->
+        <script src="{{ url_for('static', filename='js/jquery-3.7.1.min.js') }}"></script>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/dataTables.dataTables.min.css') }}">
+        <script src="{{ url_for('static', filename='js/dataTables.min.js') }}"></script>
+    </head>
+    <body>
+        <main class="container-fluid">
+            <nav>
+                <ul>
+                    <li><strong>Tidepool</strong></li>
+                </ul>
+                <ul>
+                    <li><a href="/ui">Home</a></li>
+                </ul>
+            </nav>
+            {% block content %}{% endblock %}
+            <section style="margin-top:100px;">
+                <details>
+                    <summary>API</summary>
+                    <pre><code style="font-size: 75%;">{{api_json}}</code></pre>
+                </details>
+            </section>
+        </main>
+    </body>
+</html>

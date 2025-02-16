@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}File{% endblock %}
+
+{% block content %}
+
+<section>
+    <table>
+        <tbody>
+            <tr>
+                <td>File UUID</td>
+                <td><code>{{api.file_uuid}}</code></td>
+            </tr>
+            <tr>
+                <td>Filename</td>
+                <td><code>{{api.filename}}</code></td>
+            </tr>
+            <tr>
+                <td>Mimetype</td>
+                <td><code>{{api.mimetype}}</code></td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+<section>
+    <h2>File Content</h2>
+    <iframe src="{{api.data_uri}}" style="width: 100%; height:600px;"></iframe>
+</section>
+{% endblock %}

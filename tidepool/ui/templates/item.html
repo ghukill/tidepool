@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Item{% endblock %}
+
+{% block content %}
+
+<section>
+    <table>
+        <tbody>
+            <tr>
+                <td>Item UUID</td>
+                <td><code>{{api.item_uuid}}</code></td>
+            </tr>
+            <tr>
+                <td>Title</td>
+                <td>{{api.title}}</td>
+            </tr>
+            <tr>
+                <td>Created</td>
+                <td>{{api.date_created}}</td>
+            </tr>
+            <tr>
+                <td>Files</td>
+                <td>
+                    <table>
+                        <thead>
+                            <th>File UUID</th>
+                            <th>Filename</th>
+                            <th>Mimetype</th>
+                            <th>Actions</th>
+                        </thead>
+                        <tbody>
+                            {% for file in api.files %}
+                                <tr>
+                                    <td><code>{{file.file_uuid}}</code></td>
+                                    <td><code>{{file.filename}}</code></td>
+                                    <td><code>{{file.mimetype}}</code></td>
+                                    <td><a href="/ui/items/{{api.item_uuid}}/files/{{file.file_uuid}}">View</a></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+{% endblock %}
