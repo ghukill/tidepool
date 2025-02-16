@@ -40,6 +40,7 @@ class File:
 
     def to_dict(self):
         return {
+            "item_uuid": str(self.item_uuid),
             "file_uuid": str(self.file_uuid),
             "api_uri": self.api_uri,
             "data_uri": f"{self.api_uri}/data",
