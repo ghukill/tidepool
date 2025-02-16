@@ -2,15 +2,14 @@
 
 import datetime
 import json
-from typing import TYPE_CHECKING, Optional
+import mimetypes
+from typing import Optional
 
 from pyld import jsonld
 
+from tidepool import File
 from tidepool.exceptions import FileNotFound
 from tidepool.settings.manager import settings
-
-if TYPE_CHECKING:
-    from tidepool import File
 
 
 class Item:
@@ -53,6 +52,31 @@ class Item:
 
     def to_json(self, indent=None):
         return json.dumps(self.to_dict(), indent=indent)
+
+    @classmethod
+    def from_file(
+        cls,
+        filepath: str,
+        title: str | None = None,
+        metadata: dict | None = None,
+    ):
+        filename = filepath.split("/")[-1]
+        mimetype, _ = mimetypes.guess_type(filepath)
+        item = cls(
+            title=title or filename,
+            files=[
+                File(
+                    filename=filename,
+                    mimetype=mimetype,
+                    filepath=filepath,
+                )
+            ],
+        )
+        item.jsonld_metadata.set_statement("dc:title", item.title)
+        if metadata:
+            for key, val in metadata.items():
+                item.jsonld_metadata.set_statement(key, val)
+        return item
 
 
 class ItemMetadata:

@@ -19,6 +19,10 @@ ui_app = Flask(__name__)
 @ui_app.before_request
 def before_request():
     api_path = request.path.removeprefix("/ui")
+
+    if "/static/" in api_path:
+        return
+
     api_url = f"{settings.API_BASE_URI}/{api_path}".removesuffix("/")
     logger.debug(api_url)
     api_response = requests.get(api_url)
