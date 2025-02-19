@@ -32,23 +32,15 @@ REPOSITORY_NAME = os.environ.get(
 # Database
 # -------------------------------------------------------------------
 DATABASE = {
-    "HOST": os.environ.get("TIDEPOOL_DB_HOST", "localhost"),
-    "PORT": os.environ.get("TIDEPOOL_DB_PORT", "5432"),
-    "NAME": os.environ.get("TIDEPOOL_DB_NAME", "tidepool"),
-    "USERNAME": os.environ.get("TIDEPOOL_DB_USERNAME", "postgres"),
-    "PASSWORD": os.environ.get("TIDEPOOL_DB_PASSWORD", "password"),
-    "DATA_DIR": os.environ.get("TIDEPOOL_DB_DATA_DIR", "$HOME/.tidepool/postgres/data"),
+    "SERVICE_DIR": "tidepool/services/db/sqlite",
+    "NAME": os.environ.get("TIDEPOOL_SQLITE_DB_NAME", "tidepool.sqlite"),
+    "DATA_DIR": os.environ.get("TIDEPOOL_SQLITE_DB_DATA_DIR", "/tmp/tidepool/db/sqlite"),
 }
+os.makedirs(DATABASE["DATA_DIR"], exist_ok=True)
+print(DATABASE)
 DATABASE_CONNECTION_URI = os.environ.get(
-    "TIDEPOOL_DB_CONNECTION_STRING",
-    "postgresql://%s:%s@%s:%s/%s"
-    % (
-        DATABASE["USERNAME"],
-        DATABASE["PASSWORD"],
-        DATABASE["HOST"],
-        DATABASE["PORT"],
-        DATABASE["NAME"],
-    ),
+    "TIDEPOOL_SQLITE_DB_CONNECTION_STRING",
+    f"sqlite:///{os.path.join(DATABASE['DATA_DIR'], DATABASE['NAME'])}",
 )
 
 
@@ -60,9 +52,7 @@ PRIMARY_STORAGE_SERVICE = {
     "class": "POSIXStorageService",
     "config": {
         "NAME": "primary local filesystem storage",
-        "DATA_DIR": os.environ.get(
-            "TIDEPOOL_POSIX_DATA_DIR", "$HOME/.tidepool/posix/data"
-        ),
+        "DATA_DIR": os.environ.get("TIDEPOOL_POSIX_DATA_DIR"),
     },
 }
 

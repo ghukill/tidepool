@@ -1,8 +1,8 @@
 """tidepool/services/db"""
 
-from tidepool.services.db.base import DBService, PostgresDBService
+from tidepool.services.db.base import DBService, SQLDBService
 
 __all__ = [
     "DBService",
-    "PostgresDBService",
+    "SQLDBService",
 ]

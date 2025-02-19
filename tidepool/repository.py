@@ -7,7 +7,7 @@ from typing import Generator, Iterator
 
 from tidepool import File, Item
 from tidepool.exceptions import ItemNotFound
-from tidepool.services.db import PostgresDBService
+from tidepool.services.db import SQLDBService
 from tidepool.services.storage import StorageService
 from tidepool.settings.manager import settings
 
@@ -18,7 +18,7 @@ class TidepoolRepository:
     def __init__(self) -> None:
         self.name = settings.REPOSITORY_NAME
         self.settings = settings
-        self.db = PostgresDBService()
+        self.db = SQLDBService()
         self.storage = self.load_primary_storage_service()
 
     def __repr__(self) -> str:

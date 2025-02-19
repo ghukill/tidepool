@@ -4,8 +4,7 @@ import logging
 import uuid
 from typing import Iterator, Optional
 
-from sqlalchemy import UUID, Column, DateTime, ForeignKey, String, create_engine
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import Column, DateTime, ForeignKey, String, create_engine, JSON
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, declarative_base, relationship, sessionmaker
 from sqlalchemy.sql import func
@@ -32,13 +31,13 @@ class ItemDB(Base):
     __tablename__ = "item"
 
     item_uuid = Column(
-        UUID(as_uuid=True),
+        String(36),
         primary_key=True,
         index=True,
-        default=uuid.uuid4,
+        default=lambda: str(uuid.uuid4()),
     )
     title = Column(String, index=True)
-    jsonld_metadata = Column(JSONB, nullable=False, default={})
+    jsonld_metadata = Column(JSON, nullable=False, default={})
     date_created = Column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -70,13 +69,13 @@ class FileDB(Base):
     __tablename__ = "file"
 
     file_uuid = Column(
-        UUID(as_uuid=True),
+        String(36),
         primary_key=True,
         index=True,
-        default=uuid.uuid4,
+        default=lambda: str(uuid.uuid4()),
     )
     item_uuid = Column(
-        UUID(as_uuid=True),
+        String(36),
         ForeignKey("item.item_uuid", ondelete="RESTRICT"),
         index=True,
         nullable=False,
@@ -116,10 +115,10 @@ class RelationshipDB(Base):
     __tablename__ = "relationship"
 
     relationship_uuid = Column(
-        UUID(as_uuid=True),
+        String(36),
         primary_key=True,
         index=True,
-        default=uuid.uuid4,
+        default=lambda: str(uuid.uuid4()),
     )
 
     subject = Column(String, index=True)
@@ -134,7 +133,7 @@ class RelationshipDB(Base):
     date_updated = Column(DateTime(timezone=True), onupdate=func.now())
 
 
-class PostgresDBService(DBService):
+class SQLDBService(DBService):
     def __init__(self, session: Session | None = None):
         self.session = session or create_db_session()
 

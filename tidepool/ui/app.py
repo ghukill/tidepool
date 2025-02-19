@@ -3,7 +3,7 @@
 import json
 import logging
 
-from flask import Flask, render_template, request, g
+from flask import Flask, render_template, request, g, redirect, url_for
 import requests
 
 from tidepool.settings.manager import settings
@@ -58,6 +58,12 @@ def items_item(item_uuid: str):
         api=g.api,
         api_json=json.dumps(g.api, indent=4),
     )
+
+
+@ui_app.route("/ui/items/<item_uuid>/delete", methods=["GET"])
+def items_item_delete(item_uuid: str):
+    logger.info(f"deleting item: {item_uuid}")
+    return redirect(url_for("items"))
 
 
 @ui_app.route("/ui/items/<item_uuid>/files/<file_uuid>", methods=["GET"])

@@ -48,6 +48,21 @@ def items_item(item_uuid: str):
     return jsonify(item.to_dict())
 
 
+@api_app.route("/api/items/<item_uuid>/delete", methods=["GET"])
+def items_item_delete(item_uuid: str):
+    # TODO: standardize this; maybe embed as @before_request
+    tr = TidepoolRepository()
+    item = tr.get_item(item_uuid=item_uuid)
+    tr.delete_item(item=item)
+    return jsonify(
+        {
+            "item_uuid": item_uuid,
+            "action": "delete",
+            "success": True,
+        }
+    ), 200
+
+
 @api_app.route("/api/items/<item_uuid>/files", methods=["GET"])
 def items_item_files(item_uuid: str):
     tr = TidepoolRepository()

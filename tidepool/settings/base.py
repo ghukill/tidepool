@@ -32,23 +32,16 @@ REPOSITORY_NAME = os.environ.get(
 # Database
 # -------------------------------------------------------------------
 DATABASE = {
-    "HOST": os.environ.get("TIDEPOOL_DB_HOST", "localhost"),
-    "PORT": os.environ.get("TIDEPOOL_DB_PORT", "5432"),
-    "NAME": os.environ.get("TIDEPOOL_DB_NAME", "tidepool"),
-    "USERNAME": os.environ.get("TIDEPOOL_DB_USERNAME", "postgres"),
-    "PASSWORD": os.environ.get("TIDEPOOL_DB_PASSWORD", "password"),
-    "DATA_DIR": os.environ.get("TIDEPOOL_DB_DATA_DIR", "$HOME/.tidepool/postgres/data"),
-}
-DATABASE_CONNECTION_URI = os.environ.get(
-    "TIDEPOOL_DB_CONNECTION_STRING",
-    "postgresql://%s:%s@%s:%s/%s"
-    % (
-        DATABASE["USERNAME"],
-        DATABASE["PASSWORD"],
-        DATABASE["HOST"],
-        DATABASE["PORT"],
-        DATABASE["NAME"],
+    "SERVICE_DIR": "tidepool/services/db/sqlite",
+    "NAME": os.environ.get("TIDEPOOL_SQLITE_DB_NAME", "tidepool.sqlite"),
+    "DATA_DIR": os.environ.get(
+        "TIDEPOOL_SQLITE_DB_DATA_DIR", os.path.expandvars("$HOME/.tidepool/sqlite/data")
     ),
+}
+os.makedirs(DATABASE["DATA_DIR"], exist_ok=True)
+DATABASE_CONNECTION_URI = os.environ.get(
+    "TIDEPOOL_SQLITE_DB_CONNECTION_STRING",
+    f"sqlite:///{os.path.join(DATABASE['DATA_DIR'], DATABASE['NAME'])}",
 )
 
 
@@ -67,25 +60,25 @@ PRIMARY_STORAGE_SERVICE = {
 }
 
 REPLICATION_STORAGE_SERVICES = [
-    {
-        "module": "tidepool.services.storage",
-        "class": "S3StorageService",
-        "config": {
-            "NAME": "local dockerized minio instance",
-            "REGION": os.environ.get("TIDEPOOL_MINIO_REGION", "us-east-1"),
-            "ENDPOINT": os.environ.get(
-                "TIDEPOOL_MINIO_ENDPOINT", "http://localhost:9000"
-            ),
-            "ACCESS_KEY_ID": os.environ.get("TIDEPOOL_MINIO_ACCESS_KEY_ID", "tidepool"),
-            "SECRET_ACCESS_KEY": os.environ.get(
-                "TIDEPOOL_MINIO_SECRET_ACCESS_KEY", "password"
-            ),
-            "BUCKET": os.environ.get("TIDEPOOL_MINIO_BUCKET", "tidepool"),
-            "DATA_DIR": os.environ.get(
-                "TIDEPOOL_MINIO_DATA_DIR", "$HOME/.tidepool/minio/data"
-            ),
-        },
-    },
+    # {
+    #     "module": "tidepool.services.storage",
+    #     "class": "S3StorageService",
+    #     "config": {
+    #         "NAME": "local dockerized minio instance",
+    #         "REGION": os.environ.get("TIDEPOOL_MINIO_REGION", "us-east-1"),
+    #         "ENDPOINT": os.environ.get(
+    #             "TIDEPOOL_MINIO_ENDPOINT", "http://localhost:9000"
+    #         ),
+    #         "ACCESS_KEY_ID": os.environ.get("TIDEPOOL_MINIO_ACCESS_KEY_ID", "tidepool"),
+    #         "SECRET_ACCESS_KEY": os.environ.get(
+    #             "TIDEPOOL_MINIO_SECRET_ACCESS_KEY", "password"
+    #         ),
+    #         "BUCKET": os.environ.get("TIDEPOOL_MINIO_BUCKET", "tidepool"),
+    #         "DATA_DIR": os.environ.get(
+    #             "TIDEPOOL_MINIO_DATA_DIR", "$HOME/.tidepool/minio/data"
+    #         ),
+    #     },
+    # },
     # {
     #     "module": "tidepool.services.storage",
     #     "class": "S3StorageService",
