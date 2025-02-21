@@ -64,7 +64,9 @@ class S3StorageService(StorageService):
         self,
         file: File,
     ) -> bytes:
-        raise NotImplementedError()
+        s3client = self.get_s3_client()
+        s3_key = self.get_s3_key(file)
+        return s3client.read(s3_key)
 
 
 class S3Client:
